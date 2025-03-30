@@ -39,7 +39,7 @@
       containerArgs = {
         name = "nau";
         tag = "latest";
-        copyToRoot = with pkgs; [
+        contents = with pkgs; [
           bash
           uutils-coreutils-noprefix
           dockerTools.caCertificates
@@ -59,6 +59,7 @@
 
             max-jobs = auto
             cores = 0
+            download-buffer-size = 1073741824  # 1 GiB
 
             experimental-features = nix-command flakes
             require-sigs = true
@@ -82,7 +83,8 @@
     {
       packages."${system}" = {
         default = pkg;
-        container = pkgs.dockerTools.buildImage containerArgs;
+        container = pkgs.dockerTools.buildLayeredImage containerArgs;
+        containerStream = pkgs.dockerTools.streamLayeredImage containerArgs;
       };
     };
 }
