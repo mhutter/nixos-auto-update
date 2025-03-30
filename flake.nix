@@ -26,8 +26,11 @@
             cp -v "$fake" "$target"
           done
 
-          rm -vf ./result*
+          # Update
+          nix flake update
 
+          # Build configurations
+          rm -vf ./result*
           for host in tera nxzt; do
             nix build .#nixosConfigurations."''${host}".config.system.build.toplevel --out-link "result-''${host}"
           done
@@ -45,16 +48,6 @@
           dockerTools.caCertificates
 
           (writeTextDir "etc/nix/nix.conf" ''
-            #
-            # Upstream settings
-            #
-            build-users-group = nixbld
-            # sandbox = false
-            # trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=
-
-            #
-            # Own settings
-            #
             auto-optimise-store = false
 
             max-jobs = auto
