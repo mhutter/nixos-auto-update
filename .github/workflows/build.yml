@@ -1,0 +1,29 @@
+---
+name: "Build and push image"
+
+# yamllint disable-line rule:truthy
+on:
+  push:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: DeterminateSystems/nix-installer-action@v16
+      - uses: actions/checkout@v4
+
+      - name: Build container image
+        run: nix build .#container
+
+      - name: Push to GHCR.io
+        run: |-
+          skopeo copy \
+            --dest-creds "${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}" \
+            "docker-archive:./result" \
+            "docker://ghcr.io/${{ github.repository }}:latest"
+        if: github.ref == 'refs/heads/main'
